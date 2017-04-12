@@ -13,8 +13,21 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int s
   sprite->vx = 0;
   sprite->vy = 0;
   sprite->current = 0;
-  if(type == 0)
+  switch(type){
+  case 0:
     sprite->current = INIT_DIR;
+    break;
+  case 1:
+    app_ast(sprite,sprite_picture);
+    break;
+  case 2:
+    app_ast(sprite,sprite_picture);
+    break;
+  case 3:
+    app_ast(sprite,sprite_picture);
+    break;
+  default:
+    break;}
 }
 
 void sprite_turn_left(sprite_t *sprite)
@@ -74,4 +87,28 @@ void app_project(sprite_t *space_ship, sprite_t *project)
   project->vy = VIT_PROJ * (-sin(project->current * 10 * M_PI / 180));
   project->col = project->x;
   project->lig = project->y;
+}
+
+void app_ast(sprite_t *asteroid, SDL_Surface *aster)
+{
+  asteroid->current = rand()%36;
+  switch(asteroid->type){
+  case 1:
+    asteroid->vx = VIT_BIG_AST * cos(asteroid->current * 10 * M_PI / 180);
+    asteroid->vy = VIT_BIG_AST * (-sin(asteroid->current * 10 * M_PI / 180));
+    break;
+  case 2:
+    asteroid->vx = VIT_MED_AST * cos(asteroid->current * 10 * M_PI / 180);
+    asteroid->vy = VIT_MED_AST * (-sin(asteroid->current * 10 * M_PI / 180));
+    break;
+  case 3:
+    asteroid->vx = VIT_SMALL_AST * cos(asteroid->current * 10 * M_PI / 180);
+    asteroid->vy = VIT_SMALL_AST * (-sin(asteroid->current * 10 * M_PI / 180));
+    break;}
+  asteroid->col = rand()%(SCREEN_WIDTH - asteroid->size);
+  asteroid->lig = rand()%(SCREEN_HEIGHT - asteroid->size);
+  asteroid->x = asteroid->col;
+  asteroid->y = asteroid->lig;
+  aster->clip_rect.x = asteroid->col;
+  aster->clip_rect.y = asteroid->lig;
 }

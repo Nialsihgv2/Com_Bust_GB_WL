@@ -81,6 +81,7 @@ void HandleEvent(SDL_Event event,
 
 int main(int argc, char* argv[])
 {
+  srand(time(NULL));
   SDL_Surface *screen, *temp, *sprite, *background, *project, *big_ast,
     *med_ast, *small_ast;
   int colorkey;
@@ -157,6 +158,7 @@ int main(int argc, char* argv[])
   big_ast->clip_rect.x = 0;
   big_ast->clip_rect.y = 0;
   sprite_init(&big_asteroid, 1, big_ast, BIG_AST_SIZE, 32);
+  
   med_ast->clip_rect.x = 64;
   med_ast->clip_rect.y = 0;
   sprite_init(&med_asteroid, 2, med_ast, MED_AST_SIZE, 32);
@@ -192,6 +194,9 @@ int main(int argc, char* argv[])
       spritePosition.x = space_ship.col;
       spritePosition.y = space_ship.lig;
       sprite_move(&projectile);
+      sprite_move(&big_asteroid);
+      sprite_move(&med_asteroid);
+      sprite_move(&small_asteroid);
 
       /* draw the background */
       SDL_BlitSurface(background, NULL, screen, NULL);
