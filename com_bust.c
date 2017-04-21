@@ -197,6 +197,9 @@ int main(int argc, char* argv[])
       sprite_move(&big_asteroid);
       sprite_move(&med_asteroid);
       sprite_move(&small_asteroid);
+      proj_contact(&projectile, &big_asteroid);
+      proj_contact(&projectile, &med_asteroid);
+      proj_contact(&projectile, &small_asteroid);
 
       /* draw the background */
       SDL_BlitSurface(background, NULL, screen, NULL);
@@ -225,28 +228,31 @@ int main(int argc, char* argv[])
 	  SDL_BlitSurface(project, &projImage, screen, &spritePosition);}
       }
       {
-	spritePosition.x = big_asteroid.col;
-	spritePosition.y = big_asteroid.lig;
-	SDL_Rect bastImage;
-	bastImage.x = anim * big_asteroid.size;
-	bastImage.y = 0;
-	bastImage.w = big_asteroid.size;
-	bastImage.h = big_asteroid.size;
-
-	SDL_BlitSurface(big_ast, &bastImage, screen, &spritePosition);
+	if(big_asteroid.x>=0){
+	  spritePosition.x = big_asteroid.col;
+	  spritePosition.y = big_asteroid.lig;
+	  SDL_Rect bastImage;
+	  bastImage.x = anim * big_asteroid.size;
+	  bastImage.y = 0;
+	  bastImage.w = big_asteroid.size;
+	  bastImage.h = big_asteroid.size;
+	  
+	  SDL_BlitSurface(big_ast, &bastImage, screen, &spritePosition);}
       }
       {
-	spritePosition.x = med_asteroid.col;
-	spritePosition.y = med_asteroid.lig;
-	SDL_Rect mastImage;
-	mastImage.x = anim * med_asteroid.size;
-	mastImage.y = 0;
-	mastImage.w = med_asteroid.size;
-	mastImage.h = med_asteroid.size;
-
-	SDL_BlitSurface(med_ast, &mastImage, screen, &spritePosition);
+	if(med_asteroid.x>=0){
+	  spritePosition.x = med_asteroid.col;
+	  spritePosition.y = med_asteroid.lig;
+	  SDL_Rect mastImage;
+	  mastImage.x = anim * med_asteroid.size;
+	  mastImage.y = 0;
+	  mastImage.w = med_asteroid.size;
+	  mastImage.h = med_asteroid.size;
+	  
+	  SDL_BlitSurface(med_ast, &mastImage, screen, &spritePosition);}
       }
       {
+	if(small_asteroid.x>=0){
 	spritePosition.x = small_asteroid.col;
 	spritePosition.y = small_asteroid.lig;
 	SDL_Rect sastImage;
@@ -255,7 +261,7 @@ int main(int argc, char* argv[])
 	sastImage.w = small_asteroid.size;
 	sastImage.h = small_asteroid.size;
 
-	SDL_BlitSurface(small_ast, &sastImage, screen, &spritePosition);
+	SDL_BlitSurface(small_ast, &sastImage, screen, &spritePosition);}
       }
       /* update the screen */
       SDL_UpdateRect(screen, 0, 0, 0, 0);

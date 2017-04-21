@@ -54,7 +54,7 @@ void sprite_move(sprite_t *sprite)
       sprite->x = -2;
       sprite->y = -2;}
     break;
-  default:
+  case 0:
     if(sprite->x < 0)
       sprite->x = sprite->x + SCREEN_WIDTH - sprite->size;
     else if(sprite->x > SCREEN_WIDTH - sprite->size)
@@ -63,7 +63,22 @@ void sprite_move(sprite_t *sprite)
       sprite->y = sprite->y + SCREEN_HEIGHT - sprite->size;
     else if(sprite->y > SCREEN_HEIGHT - sprite->size)
       sprite->y =sprite->y - SCREEN_HEIGHT + sprite->size;
-    break;}
+    break;
+  default:
+    if(sprite->x <= -1){
+      sprite->x = -2;
+      sprite->y = -2;}
+    else{
+      if(sprite->x < 0)
+	sprite->x = sprite->x + SCREEN_WIDTH - sprite->size;
+      else if(sprite->x > SCREEN_WIDTH - sprite->size)
+	sprite->x =sprite->x - SCREEN_WIDTH + sprite->size;
+      if(sprite->y < 0)
+	sprite->y = sprite->y + SCREEN_HEIGHT - sprite->size;
+      else if(sprite->y > SCREEN_HEIGHT - sprite->size)
+	sprite->y =sprite->y - SCREEN_HEIGHT + sprite->size;}
+    break;
+}
     sprite->col = sprite->x;
     sprite->lig = sprite->y;
 }
@@ -112,3 +127,30 @@ void app_ast(sprite_t *asteroid, SDL_Surface *aster)
   aster->clip_rect.x = asteroid->col;
   aster->clip_rect.y = asteroid->lig;
 }
+
+void proj_contact(sprite_t *project, sprite_t *ast)
+{
+  SDL_Rect center_proj, center_ast;
+  double rayon_proj, rayon_ast;
+  int i, j;
+  center_proj.x = project->x + project->size/2;
+  center_proj.y = project->y + project->size/2;
+  rayon_proj = project->size/2;
+  center_ast.x = ast->x + ast->size/2;
+  center_ast.y = ast->y + ast->size/2;
+  rayon_ast = ast->size/2;
+  for(j = project->y ; j <= project->y + project->size ; j++){
+    for(i = project->x ; i <= project->x + project->size ; i++){
+      if((pow(center_proj.x - i,2) + pow(center_proj.y - j,2)) <= pow(rayon_proj,2) && (pow(center_ast.x - i,2) + pow(center_ast.y - j,2)) <= pow(rayon_ast,2)){
+	ast->x = -2;
+	ast->y = -2;
+	ast->col = -2;
+	ast->lig = -2;
+	ast->vx = 0;
+	ast->vy = 0;
+	return;
+      }
+    }
+  }
+}
+

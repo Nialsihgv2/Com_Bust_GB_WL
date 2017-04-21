@@ -45,6 +45,6 @@ void sprite_move(sprite_t *sprite);
 void sprite_boost(sprite_t *sprite, float accel);
 void app_project(sprite_t *space_ship, sprite_t *project);
 void app_ast(sprite_t *asteroid, SDL_Surface *aster);
-
+void proj_contact(sprite_t *project, sprite_t *ast);
 
 #endif
