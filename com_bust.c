@@ -191,8 +191,8 @@ int main(int argc, char* argv[])
       sprite_boost(&space_ship, accel);
       sprite_move(&space_ship);
       /* collide with edges of screen */
-      spritePosition.x = space_ship.col;
-      spritePosition.y = space_ship.lig;
+      spritePosition.x = space_ship.x;
+      spritePosition.y = space_ship.y;
       sprite_move(&projectile);
       sprite_move(&big_asteroid);
       sprite_move(&med_asteroid);
@@ -217,8 +217,8 @@ int main(int argc, char* argv[])
       }
       {
 	if(projectile.x>=0){
-	  spritePosition.x = projectile.col;
-	  spritePosition.y = projectile.lig;
+	  spritePosition.x = projectile.x;
+	  spritePosition.y = projectile.y;
 	  SDL_Rect projImage;
 	  projImage.x = 0;
 	  projImage.y = 0;
@@ -229,8 +229,8 @@ int main(int argc, char* argv[])
       }
       {
 	if(big_asteroid.x>=0){
-	  spritePosition.x = big_asteroid.col;
-	  spritePosition.y = big_asteroid.lig;
+	  spritePosition.x = big_asteroid.x;
+	  spritePosition.y = big_asteroid.y;
 	  SDL_Rect bastImage;
 	  bastImage.x = anim * big_asteroid.size;
 	  bastImage.y = 0;
@@ -241,8 +241,8 @@ int main(int argc, char* argv[])
       }
       {
 	if(med_asteroid.x>=0){
-	  spritePosition.x = med_asteroid.col;
-	  spritePosition.y = med_asteroid.lig;
+	  spritePosition.x = med_asteroid.x;
+	  spritePosition.y = med_asteroid.y;
 	  SDL_Rect mastImage;
 	  mastImage.x = anim * med_asteroid.size;
 	  mastImage.y = 0;
@@ -253,8 +253,8 @@ int main(int argc, char* argv[])
       }
       {
 	if(small_asteroid.x>=0){
-	spritePosition.x = small_asteroid.col;
-	spritePosition.y = small_asteroid.lig;
+	spritePosition.x = small_asteroid.x;
+	spritePosition.y = small_asteroid.y;
 	SDL_Rect sastImage;
 	sastImage.x = anim * small_asteroid.size;
 	sastImage.y = 0;

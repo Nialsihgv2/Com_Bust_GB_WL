@@ -19,8 +19,6 @@ typedef struct Sprite_t sprite_t;
 
 struct Sprite_t{
   int type;
-  int col;
-  int lig;
   double x;
   double y;
   int current;
@@ -30,11 +28,11 @@ struct Sprite_t{
   double vy;
 };
 
-typedef struct L_Asteroid L_asteroid;
+typedef struct L_Asteroid l_asteroid;
 
 struct L_Asteroid{
   sprite_t first;
-  L_asteroid *next;
+  l_asteroid *next;
 };
 
 

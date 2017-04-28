@@ -4,8 +4,6 @@
 void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int sprite_size, int anim_sprite_num)
 {
   sprite->type = type;
-  sprite->col = sprite_picture->clip_rect.x;
-  sprite->lig = sprite_picture->clip_rect.y;
   sprite->x = sprite_picture->clip_rect.x;
   sprite->y = sprite_picture->clip_rect.y;
   sprite->size = sprite_size;
@@ -78,9 +76,7 @@ void sprite_move(sprite_t *sprite)
       else if(sprite->y > SCREEN_HEIGHT - sprite->size)
 	sprite->y =sprite->y - SCREEN_HEIGHT + sprite->size;}
     break;
-}
-    sprite->col = sprite->x;
-    sprite->lig = sprite->y;
+  }
 }
 
 void sprite_boost(sprite_t *sprite, float accel)
@@ -100,8 +96,6 @@ void app_project(sprite_t *space_ship, sprite_t *project)
   project->y = (space_ship->y + space_ship->size / 2) + (space_ship->size / 2 * (-sin(space_ship->current * 10 * M_PI / 180))) - project->size / 2;
   project->vx = VIT_PROJ * cos(project->current * 10 * M_PI / 180);
   project->vy = VIT_PROJ * (-sin(project->current * 10 * M_PI / 180));
-  project->col = project->x;
-  project->lig = project->y;
 }
 
 void app_ast(sprite_t *asteroid, SDL_Surface *aster)
@@ -120,12 +114,10 @@ void app_ast(sprite_t *asteroid, SDL_Surface *aster)
     asteroid->vx = VIT_SMALL_AST * cos(asteroid->current * 10 * M_PI / 180);
     asteroid->vy = VIT_SMALL_AST * (-sin(asteroid->current * 10 * M_PI / 180));
     break;}
-  asteroid->col = rand()%(SCREEN_WIDTH - asteroid->size);
-  asteroid->lig = rand()%(SCREEN_HEIGHT - asteroid->size);
-  asteroid->x = asteroid->col;
-  asteroid->y = asteroid->lig;
-  aster->clip_rect.x = asteroid->col;
-  aster->clip_rect.y = asteroid->lig;
+  asteroid->x = rand()%(SCREEN_WIDTH - asteroid->size);
+  asteroid->y = rand()%(SCREEN_HEIGHT - asteroid->size);
+  aster->clip_rect.x = asteroid->x;
+  aster->clip_rect.y = asteroid->y;
 }
 
 void proj_contact(sprite_t *project, sprite_t *ast)
@@ -144,8 +136,6 @@ void proj_contact(sprite_t *project, sprite_t *ast)
       if((pow(center_proj.x - i,2) + pow(center_proj.y - j,2)) <= pow(rayon_proj,2) && (pow(center_ast.x - i,2) + pow(center_ast.y - j,2)) <= pow(rayon_ast,2)){
 	ast->x = -2;
 	ast->y = -2;
-	ast->col = -2;
-	ast->lig = -2;
 	ast->vx = 0;
 	ast->vy = 0;
 	return;
