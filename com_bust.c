@@ -65,6 +65,7 @@ void HandleEvent(SDL_Event event,
       *accel = CONS_ACCEL;
       break;
     case SDLK_DOWN:
+      *accel = - CONS_ACCEL;
       break;
     case SDLK_SPACE:
       if(project->x < 0)
@@ -98,7 +99,7 @@ int main(int argc, char* argv[])
   SDL_Init(SDL_INIT_VIDEO);
   
   /* set the title bar */
-  SDL_WM_SetCaption("Comete Buster", "Comete Buster");
+  SDL_WM_SetCaption("Comet Busters", "Comet Busters");
   
   /* create window */
   screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
@@ -264,9 +265,21 @@ int main(int argc, char* argv[])
 	SDL_BlitSurface(small_ast, &sastImage, screen, &spritePosition);}
       }
       /* update the screen */
+  for(int i=0;i<5;i++){
+    {
+      SDL_Rect spriteImage;
+      spriteImage.x = 0;
+      spriteImage.y = 0;
+      spriteImage.w = space_ship.size;
+      spriteImage.h = space_ship.size;
+      /* choose image according to direction and animation flip: */
+      spritePosition.x = i * space_ship.size;
+      spritePosition.y = 0;
+      SDL_BlitSurface(sprite, &spriteImage, screen, &spritePosition);
+    }
+  }
       SDL_UpdateRect(screen, 0, 0, 0, 0);
     }
-  
   /* clean up */
   SDL_FreeSurface(sprite);
   SDL_FreeSurface(background);
