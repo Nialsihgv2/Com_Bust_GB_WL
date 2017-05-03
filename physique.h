@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <math.h>
 #include <time.h>
+#include <stdbool.h>
 
 
 #define INIT_DIR 9
@@ -44,5 +45,6 @@ void sprite_boost(sprite_t *sprite, float accel);
 void app_project(sprite_t *space_ship, sprite_t *project);
 void app_ast(sprite_t *asteroid, SDL_Surface *aster);
 void proj_contact(sprite_t *project, sprite_t *ast);
+bool ship_contact(sprite_t *ship, sprite_t *ast);
 
 #endif

@@ -144,3 +144,24 @@ void proj_contact(sprite_t *project, sprite_t *ast)
   }
 }
 
+bool ship_contact(sprite_t *ship, sprite_t *ast)
+{
+  SDL_Rect center_ship, center_ast;
+  double rayon_ship, rayon_ast;
+  int i, j;
+  center_ship.x = ship->x + ship->size/2;
+  center_ship.y = ship->y + ship->size/2;
+  rayon_ship = ship->size/2;
+  center_ast.x = ast->x + ast->size/2;
+  center_ast.y = ast->y + ast->size/2;
+  rayon_ast = ast->size/2;
+  for(j = ship->y ; j <= ship->y + ship->size ; j++){
+    for(i = ship->x ; i <= ship->x + ship->size ; i++){
+      if((pow(center_ship.x - i,2) + pow(center_ship.y - j,2)) <= pow(rayon_ship,2) && (pow(center_ast.x - i,2) + pow(center_ast.y - j,2)) <= pow(rayon_ast,2)){
+	return true;
+      }
+    }
+  }
+  return false;
+}
+
