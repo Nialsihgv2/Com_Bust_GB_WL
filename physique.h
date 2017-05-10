@@ -4,37 +4,10 @@
 #include <math.h>
 #include <time.h>
 #include <stdbool.h>
+#include "lis_ast.h"
+#include "struct.h"
 
 
-#define INIT_DIR 9
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
-#define VIT_MAX 5
-#define VIT_PROJ 0.6
-#define VIT_BIG_AST 0.1
-#define VIT_MED_AST 0.2
-#define VIT_SMALL_AST 0.4
-#define FROTEMENT   0.001
-
-typedef struct Sprite_t sprite_t;
-
-struct Sprite_t{
-  int type;
-  double x;
-  double y;
-  int current;
-  int size;
-  int nb_sprite;
-  double vx;
-  double vy;
-};
-
-typedef struct L_Asteroid l_asteroid;
-
-struct L_Asteroid{
-  sprite_t first;
-  l_asteroid *next;
-};
 
 
 void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int sprite_size, int anim_sprite_num);
@@ -43,8 +16,10 @@ void sprite_turn_right(sprite_t *sprite);
 void sprite_move(sprite_t *sprite);
 void sprite_boost(sprite_t *sprite, float accel);
 void app_project(sprite_t *space_ship, sprite_t *project);
-void app_ast(sprite_t *asteroid, SDL_Surface *aster);
+void app_ast(l_ast *aster, SDL_Surface *big, SDL_Surface *med,
+	     SDL_Surface *small);
 void proj_contact(sprite_t *project, sprite_t *ast);
 bool ship_contact(sprite_t *ship, sprite_t *ast);
+void ast_move(l_ast *aster);
 
 #endif

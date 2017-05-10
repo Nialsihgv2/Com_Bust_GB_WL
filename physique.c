@@ -15,17 +15,25 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int s
   case 0:
     sprite->current = INIT_DIR;
     break;
+  case 4:
+    break;
   case 1:
-    app_ast(sprite,sprite_picture);
+    sprite->current = rand() % 36;
+    sprite->vx = VIT_BIG_AST * cos(sprite->current * 10 * M_PI / 180);
+    sprite->vy = VIT_BIG_AST * (-sin(sprite->current * 10 * M_PI / 180));
     break;
   case 2:
-    app_ast(sprite,sprite_picture);
+    sprite->current = rand() % 36;
+    sprite->vx = VIT_MED_AST * cos(sprite->current * 10 * M_PI / 180);
+    sprite->vy = VIT_MED_AST * (-sin(sprite->current * 10 * M_PI / 180));
     break;
   case 3:
-    app_ast(sprite,sprite_picture);
+    sprite->current = rand() % 36;
+    sprite->vx = VIT_MED_AST * cos(sprite->current * 10 * M_PI / 180);
+    sprite->vy = VIT_MED_AST * (-sin(sprite->current * 10 * M_PI / 180));
     break;
   default:
-    break;}
+  break;}
 }
 
 void sprite_turn_left(sprite_t *sprite)
@@ -98,26 +106,43 @@ void app_project(sprite_t *space_ship, sprite_t *project)
   project->vy = VIT_PROJ * (-sin(project->current * 10 * M_PI / 180));
 }
 
-void app_ast(sprite_t *asteroid, SDL_Surface *aster)
+void app_ast(l_ast *aster, SDL_Surface *big, SDL_Surface *med,
+	     SDL_Surface *small)
 {
-  asteroid->current = rand()%36;
-  switch(asteroid->type){
+  sprite_t ast;
+  srand(time(NULL));
+  int type = rand() % 3 + 1;
+  int start = rand() % 2;
+  int size;
+  SDL_Rect pos_dep;
+  SDL_Surface * tmp;
+  switch(start){
+  case 0:
+    pos_dep.x = 0;
+    pos_dep.y = rand() % (SCREEN_HEIGHT);
+    break;
+  default:
+    pos_dep.x = rand() % (SCREEN_WIDTH);
+    pos_dep.y = 0;
+    break;}
+  switch(type){
   case 1:
-    asteroid->vx = VIT_BIG_AST * cos(asteroid->current * 10 * M_PI / 180);
-    asteroid->vy = VIT_BIG_AST * (-sin(asteroid->current * 10 * M_PI / 180));
+    tmp = big;
+    size = BIG_AST_SIZE;
     break;
   case 2:
-    asteroid->vx = VIT_MED_AST * cos(asteroid->current * 10 * M_PI / 180);
-    asteroid->vy = VIT_MED_AST * (-sin(asteroid->current * 10 * M_PI / 180));
+    tmp = med;
+    size = MED_AST_SIZE;
     break;
-  case 3:
-    asteroid->vx = VIT_SMALL_AST * cos(asteroid->current * 10 * M_PI / 180);
-    asteroid->vy = VIT_SMALL_AST * (-sin(asteroid->current * 10 * M_PI / 180));
+  default:
+    tmp = small;
+    size = SMALL_AST_SIZE;
     break;}
-  asteroid->x = rand()%(SCREEN_WIDTH - asteroid->size);
-  asteroid->y = rand()%(SCREEN_HEIGHT - asteroid->size);
-  aster->clip_rect.x = asteroid->x;
-  aster->clip_rect.y = asteroid->y;
+  tmp->clip_rect.x = pos_dep.x;
+  tmp->clip_rect.y = pos_dep.y;
+  sprite_init(&ast ,type ,tmp ,size , 32);
+  *aster = l_ast_cons(ast, *aster);
+  SDL_FreeSurface(tmp);
 }
 
 void proj_contact(sprite_t *project, sprite_t *ast)
@@ -165,3 +190,17 @@ bool ship_contact(sprite_t *ship, sprite_t *ast)
   return false;
 }
 
+void ast_move(l_ast *aster)
+{
+  l_ast tmp_ast = l_ast_new_empty();
+  l_ast tmp = l_ast_copy(*aster);
+  sprite_t tmp_sp;
+  while(!l_ast_is_empty(tmp)){
+    tmp_sp = l_ast_pop(&tmp);
+    sprite_move(&tmp_sp);
+    tmp_ast = l_ast_cons(tmp_sp, tmp_ast);}
+  l_ast_reverse(&tmp_ast);
+  *aster = l_ast_copy(tmp_ast);
+  l_ast_free(&tmp_ast);
+  l_ast_free(&tmp);
+}

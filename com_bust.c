@@ -1,37 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL.h>
-
+#include "struct.h"
+#include "lis_ast.h"
 #include "physique.h"
-
-/* Size of the window */
-#define SCREEN_WIDTH    640
-#define SCREEN_HEIGHT   480
-
-/* In the sprite, we have 36 images of a 32x32 picture */
-#define NB_SPRITE       36
-
-/* Size of ship: */
-#define SPRITE_SIZE     32
-/* Size of projectiles */
-#define PROJECT_SIZE    8
-/* Size of asteroids */
-#define BIG_AST_SIZE    64
-#define MED_AST_SIZE    32
-#define SMALL_AST_SIZE  16
-/* Nb of life at the start */
-#define MAX_LIFE        5
-/* Points added to the score */
-#define BIG_AST_POINT   20
-#define MED_AST_POINT  50
-#define SMALL_AST_POINT 100
-
-/* Order of the different directions in the picture: */
-#define INIT_DIR        9
-#define ANGLE_DIR       10
-
-/* Speed of ship */
-#define CONS_ACCEL      0.01
 
 
 /* Handle events coming from the user:
@@ -86,8 +58,7 @@ int main(int argc, char* argv[])
   SDL_Surface *screen, *temp, *sprite, *background, *project, *big_ast,
     *med_ast, *small_ast, *expl;
   int colorkey;
-  sprite_t space_ship, projectile, big_asteroid, med_asteroid, small_asteroid;
-  
+  sprite_t space_ship, projectile;  
   /* Information about the current situation of the ship: */
   
   /* Rectangle to store the position of the sprite in the window.
@@ -157,28 +128,21 @@ int main(int argc, char* argv[])
   project->clip_rect.x = -1;
   project->clip_rect.y = -1;
   sprite_init(&projectile,4,project,PROJECT_SIZE,1);
-  big_ast->clip_rect.x = 0;
-  big_ast->clip_rect.y = 0;
-  sprite_init(&big_asteroid, 1, big_ast, BIG_AST_SIZE, 32);
-  
-  med_ast->clip_rect.x = 64;
-  med_ast->clip_rect.y = 0;
-  sprite_init(&med_asteroid, 2, med_ast, MED_AST_SIZE, 32);
-  small_ast->clip_rect.x = 96;
-  small_ast->clip_rect.y = 0;
-  sprite_init(&small_asteroid, 2, small_ast, SMALL_AST_SIZE, 32);
   
   int gameover = 0;
   int anim = 0;
   int temps = 0;
   time_t actual;
-  time_t app;
+  time_t app = time(NULL);
+  time_t app_aster = time(NULL);
   time_t death;
   bool appear = true;
   bool inv = true;
   bool dest = false;
   bool crash;
   int anim_exp;
+  l_ast aster = l_ast_new_empty();
+  
   /* Define the float position of the ship */
   
   /* main loop: check events and re-draw the window until the end */
@@ -186,7 +150,7 @@ int main(int argc, char* argv[])
     {
       crash = false;
       actual = time(NULL);
-      if(dest && (difftime(actual, death) >= 5)){
+      if(dest && (difftime(actual, death) >= 3)){
 	dest = false;
 	appear = true;}
       if(inv && (difftime(actual, app) >= 3))
@@ -200,6 +164,10 @@ int main(int argc, char* argv[])
 	appear = false;
 	inv = true;
 	app = time(NULL);}
+      if(difftime(actual, app_aster) >= 5){
+	app_ast(&aster, big_ast, med_ast, small_ast);
+	app_aster = time(NULL);}
+      
 
       double accel=0.0;
       SDL_Event event;
@@ -218,28 +186,12 @@ int main(int argc, char* argv[])
       }
       sprite_boost(&space_ship, accel);
       sprite_move(&space_ship);
+      if(!l_ast_is_empty(aster)){
+	ast_move(&aster);}
       /* collide with edges of screen */
       spritePosition.x = space_ship.x;
       spritePosition.y = space_ship.y;
       sprite_move(&projectile);
-      sprite_move(&big_asteroid);
-      sprite_move(&med_asteroid);
-      sprite_move(&small_asteroid);
-      proj_contact(&projectile, &big_asteroid);
-      proj_contact(&projectile, &med_asteroid);
-      proj_contact(&projectile, &small_asteroid);
-      if(!crash && !inv && !dest){
-	crash = ship_contact(&space_ship, &big_asteroid);
-	dest = crash;
-      }
-      if(!crash && !inv && !dest){
-	crash = ship_contact(&space_ship, &med_asteroid);
-	dest = crash;
-      }
-      if(!crash && !inv && !dest){
-	crash = ship_contact(&space_ship, &small_asteroid);
-	dest = crash;
-      }
       if(crash){
 	death = time(NULL);
 	anim_exp = 0;
@@ -287,42 +239,6 @@ int main(int argc, char* argv[])
 	  projImage.h = projectile.size;
 	  
 	  SDL_BlitSurface(project, &projImage, screen, &spritePosition);}
-      }
-      {
-	if(big_asteroid.x>=0){
-	  spritePosition.x = big_asteroid.x;
-	  spritePosition.y = big_asteroid.y;
-	  SDL_Rect bastImage;
-	  bastImage.x = anim * big_asteroid.size;
-	  bastImage.y = 0;
-	  bastImage.w = big_asteroid.size;
-	  bastImage.h = big_asteroid.size;
-	  
-	  SDL_BlitSurface(big_ast, &bastImage, screen, &spritePosition);}
-      }
-      {
-	if(med_asteroid.x>=0){
-	  spritePosition.x = med_asteroid.x;
-	  spritePosition.y = med_asteroid.y;
-	  SDL_Rect mastImage;
-	  mastImage.x = anim * med_asteroid.size;
-	  mastImage.y = 0;
-	  mastImage.w = med_asteroid.size;
-	  mastImage.h = med_asteroid.size;
-	  
-	  SDL_BlitSurface(med_ast, &mastImage, screen, &spritePosition);}
-      }
-      {
-	if(small_asteroid.x>=0){
-	spritePosition.x = small_asteroid.x;
-	spritePosition.y = small_asteroid.y;
-	SDL_Rect sastImage;
-	sastImage.x = anim * small_asteroid.size;
-	sastImage.y = 0;
-	sastImage.w = small_asteroid.size;
-	sastImage.h = small_asteroid.size;
-
-	SDL_BlitSurface(small_ast, &sastImage, screen, &spritePosition);}
       }
       /* update the screen */
   for(int i=0;i<5;i++){
