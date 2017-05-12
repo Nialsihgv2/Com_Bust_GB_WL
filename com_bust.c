@@ -192,11 +192,14 @@ int main(int argc, char* argv[])
       spritePosition.x = space_ship.x;
       spritePosition.y = space_ship.y;
       sprite_move(&projectile);
+      if(!dest && !l_ast_is_empty(aster) && !inv)
+	crash = ship_contact_list(&space_ship, &aster);
       if(crash){
 	death = time(NULL);
 	anim_exp = 0;
 	space_ship.vx = 0;
-	space_ship.vy = 0;}
+	space_ship.vy = 0;
+	dest = true;}
 
       /* draw the background */
       SDL_BlitSurface(background, NULL, screen, NULL);
@@ -214,13 +217,13 @@ int main(int argc, char* argv[])
 	SDL_BlitSurface(sprite, &spriteImage, screen, &spritePosition);}
       }
       else{
-	if(anim_exp/100 < 25){
+	if(anim_exp/50 < 25){
 	  {SDL_Rect spriteImage;
 	    spriteImage.y = 0;
 	    spriteImage.w = 64;
 	    spriteImage.h = 64;
 	    /* choose image according to direction and animation flip: */
-	    spriteImage.x = anim_exp/100 * 64;
+	    spriteImage.x = anim_exp/50 * 64;
 	    spritePosition.x = space_ship.x - 16;
 	    spritePosition.y = space_ship.y - 16;
 	    
@@ -239,6 +242,35 @@ int main(int argc, char* argv[])
 	  projImage.h = projectile.size;
 	  
 	  SDL_BlitSurface(project, &projImage, screen, &spritePosition);}
+      }
+      {
+	if(!l_ast_is_empty(aster)){
+	  l_ast tmp = l_ast_copy(aster);
+	  sprite_t tmp_sp;
+	  SDL_Rect astImage;
+	  while(!l_ast_is_empty(tmp)){
+	    tmp_sp = l_ast_pop(&tmp);
+	    spritePosition.x = tmp_sp.x;
+	    spritePosition.y = tmp_sp.y;
+	    astImage.x = anim * tmp_sp.size;
+	    astImage.y = 0;
+	    astImage.w = tmp_sp.size;
+	    astImage.h = tmp_sp.size;
+	    switch(tmp_sp.type){
+	    case 1:
+	      SDL_BlitSurface(big_ast, &astImage, screen, &spritePosition);
+	      break;
+	    case 2:
+	      SDL_BlitSurface(med_ast, &astImage, screen, &spritePosition);
+	      break;
+	    case 3:
+	      SDL_BlitSurface(small_ast, &astImage, screen, &spritePosition);
+	      break;
+	    default:
+	      break;}
+	  }
+	  l_ast_free(&tmp);
+	}
       }
       /* update the screen */
   for(int i=0;i<5;i++){
@@ -259,6 +291,11 @@ int main(int argc, char* argv[])
   /* clean up */
   SDL_FreeSurface(sprite);
   SDL_FreeSurface(background);
+  SDL_FreeSurface(project);
+  SDL_FreeSurface(big_ast);
+  SDL_FreeSurface(med_ast);
+  SDL_FreeSurface(small_ast);
+  l_ast_free(&aster);
   SDL_Quit();
   
   return 0;

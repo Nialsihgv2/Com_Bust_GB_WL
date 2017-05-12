@@ -20,6 +20,7 @@ void app_ast(l_ast *aster, SDL_Surface *big, SDL_Surface *med,
 	     SDL_Surface *small);
 void proj_contact(sprite_t *project, sprite_t *ast);
 bool ship_contact(sprite_t *ship, sprite_t *ast);
+bool ship_contact_list(sprite_t *ship, l_ast *ast);
 void ast_move(l_ast *aster);
 
 #endif

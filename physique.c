@@ -71,18 +71,14 @@ void sprite_move(sprite_t *sprite)
       sprite->y =sprite->y - SCREEN_HEIGHT + sprite->size;
     break;
   default:
-    if(sprite->x <= -1){
-      sprite->x = -2;
-      sprite->y = -2;}
-    else{
-      if(sprite->x < 0)
-	sprite->x = sprite->x + SCREEN_WIDTH - sprite->size;
-      else if(sprite->x > SCREEN_WIDTH - sprite->size)
-	sprite->x =sprite->x - SCREEN_WIDTH + sprite->size;
-      if(sprite->y < 0)
-	sprite->y = sprite->y + SCREEN_HEIGHT - sprite->size;
-      else if(sprite->y > SCREEN_HEIGHT - sprite->size)
-	sprite->y =sprite->y - SCREEN_HEIGHT + sprite->size;}
+    if(sprite->x < 0)
+      sprite->x = sprite->x + SCREEN_WIDTH - sprite->size;
+    else if(sprite->x > SCREEN_WIDTH - sprite->size)
+      sprite->x =sprite->x - SCREEN_WIDTH + sprite->size;
+    if(sprite->y < 0)
+      sprite->y = sprite->y + SCREEN_HEIGHT - sprite->size;
+    else if(sprite->y > SCREEN_HEIGHT - sprite->size)
+      sprite->y =sprite->y - SCREEN_HEIGHT + sprite->size;
     break;
   }
 }
@@ -115,34 +111,33 @@ void app_ast(l_ast *aster, SDL_Surface *big, SDL_Surface *med,
   int start = rand() % 2;
   int size;
   SDL_Rect pos_dep;
-  SDL_Surface * tmp;
-  switch(start){
-  case 0:
-    pos_dep.x = 0;
-    pos_dep.y = rand() % (SCREEN_HEIGHT);
-    break;
-  default:
-    pos_dep.x = rand() % (SCREEN_WIDTH);
-    pos_dep.y = 0;
-    break;}
+  SDL_Surface tmp;
   switch(type){
   case 1:
-    tmp = big;
+    tmp = *big;
     size = BIG_AST_SIZE;
     break;
   case 2:
-    tmp = med;
+    tmp = *med;
     size = MED_AST_SIZE;
     break;
   default:
-    tmp = small;
+    tmp = *small;
     size = SMALL_AST_SIZE;
     break;}
-  tmp->clip_rect.x = pos_dep.x;
-  tmp->clip_rect.y = pos_dep.y;
-  sprite_init(&ast ,type ,tmp ,size , 32);
+  switch(start){
+  case 0:
+    pos_dep.x = 0;
+    pos_dep.y = rand() % (SCREEN_HEIGHT - size);
+    break;
+  default:
+    pos_dep.x = rand() % (SCREEN_WIDTH - size);
+    pos_dep.y = 0;
+    break;}
+  tmp.clip_rect.x = pos_dep.x;
+  tmp.clip_rect.y = pos_dep.y;
+  sprite_init(&ast ,type ,&tmp ,size , 32);
   *aster = l_ast_cons(ast, *aster);
-  SDL_FreeSurface(tmp);
 }
 
 void proj_contact(sprite_t *project, sprite_t *ast)
@@ -190,6 +185,18 @@ bool ship_contact(sprite_t *ship, sprite_t *ast)
   return false;
 }
 
+bool ship_contact_list(sprite_t *ship, l_ast *ast)
+{
+  l_ast tmp = l_ast_copy(*ast);
+  bool crash = false;
+  sprite_t tmp_sp;
+  while(!l_ast_is_empty(tmp) && !crash){
+    tmp_sp = l_ast_pop(&tmp);
+    crash = ship_contact(ship, &tmp_sp);}
+  l_ast_free(&tmp);
+  return crash;
+}
+
 void ast_move(l_ast *aster)
 {
   l_ast tmp_ast = l_ast_new_empty();
@@ -203,4 +210,5 @@ void ast_move(l_ast *aster)
   *aster = l_ast_copy(tmp_ast);
   l_ast_free(&tmp_ast);
   l_ast_free(&tmp);
+
 }
