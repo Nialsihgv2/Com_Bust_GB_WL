@@ -142,6 +142,7 @@ int main(int argc, char* argv[])
   bool crash;
   int anim_exp;
   l_ast aster = l_ast_new_empty();
+  int vies = MAX_LIFE;
   
   /* Define the float position of the ship */
   
@@ -152,7 +153,10 @@ int main(int argc, char* argv[])
       actual = time(NULL);
       if(dest && (difftime(actual, death) >= 3)){
 	dest = false;
-	appear = true;}
+	appear = true;
+	vies -= 1;}
+      if(vies == 0)
+	gameover = 1;
       if(inv && (difftime(actual, app) >= 3))
 	inv = false;
       if(!dest && appear){
@@ -192,6 +196,8 @@ int main(int argc, char* argv[])
       spritePosition.x = space_ship.x;
       spritePosition.y = space_ship.y;
       sprite_move(&projectile);
+      if(projectile.x >= 0)
+	proj_contact_list(&projectile, &aster);
       if(!dest && !l_ast_is_empty(aster) && !inv)
 	crash = ship_contact_list(&space_ship, &aster);
       if(crash){
@@ -273,7 +279,7 @@ int main(int argc, char* argv[])
 	}
       }
       /* update the screen */
-  for(int i=0;i<5;i++){
+  for(int i=0;i<vies-1;i++){
     {
       SDL_Rect spriteImage;
       spriteImage.x = 0;

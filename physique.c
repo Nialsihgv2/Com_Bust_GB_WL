@@ -29,8 +29,8 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int s
     break;
   case 3:
     sprite->current = rand() % 36;
-    sprite->vx = VIT_MED_AST * cos(sprite->current * 10 * M_PI / 180);
-    sprite->vy = VIT_MED_AST * (-sin(sprite->current * 10 * M_PI / 180));
+    sprite->vx = VIT_SMALL_AST * cos(sprite->current * 10 * M_PI / 180);
+    sprite->vy = VIT_SMALL_AST * (-sin(sprite->current * 10 * M_PI / 180));
     break;
   default:
   break;}
@@ -140,7 +140,73 @@ void app_ast(l_ast *aster, SDL_Surface *big, SDL_Surface *med,
   *aster = l_ast_cons(ast, *aster);
 }
 
-void proj_contact(sprite_t *project, sprite_t *ast)
+void div_ast(sprite_t ast, l_ast *rest, sprite_t project)
+{
+  sprite_t tmp1, tmp2;
+  tmp1 = ast;
+  tmp2 = ast;
+  switch(ast.type){
+  case 1:
+    tmp1.type = 2;
+    tmp2.type = 2;
+    tmp1.size = MED_AST_SIZE;
+    tmp2.size = MED_AST_SIZE;
+    tmp1.current = project.current + 9;
+    if(tmp1.current > 36)
+      tmp1.current -= 36;
+    else
+      if(tmp1.current < 0)
+	tmp1.current += 36;
+    tmp2.current = project.current - 9;
+    if(tmp2.current > 36)
+      tmp2.current -= 36;
+    else
+      if(tmp2.current < 0)
+	tmp2.current += 36;
+    tmp1.vx = VIT_MED_AST * cos(tmp1.current * M_PI * 10 / 180);
+    tmp1.vy = VIT_MED_AST * (-sin(tmp1.current * M_PI * 10 / 180));
+    tmp2.vx = VIT_MED_AST * cos(tmp2.current * M_PI * 10 / 180);
+    tmp2.vy = VIT_MED_AST * (-sin(tmp2.current * M_PI * 10 / 180));
+    tmp1.x += (BIG_AST_SIZE - MED_AST_SIZE)/2;
+    tmp1.y += (BIG_AST_SIZE - MED_AST_SIZE)/2;
+    tmp2.x += (BIG_AST_SIZE - MED_AST_SIZE)/2;
+    tmp2.y += (BIG_AST_SIZE - MED_AST_SIZE)/2;
+    *rest = l_ast_cons(tmp2, *rest);
+    *rest = l_ast_cons(tmp1, *rest);
+    break;
+  case 2:
+    tmp1.type = 3;
+    tmp2.type = 3;
+    tmp1.size = SMALL_AST_SIZE;
+    tmp2.size = SMALL_AST_SIZE;
+    tmp1.current = project.current + 9;
+    if(tmp1.current > 36)
+      tmp1.current -= 36;
+    else
+      if(tmp1.current < 0)
+	tmp1.current += 36;
+    tmp2.current = project.current - 9;
+    if(tmp2.current > 36)
+      tmp2.current -= 36;
+    else
+      if(tmp2.current < 0)
+	tmp2.current += 36;
+    tmp1.vx = VIT_SMALL_AST * cos(tmp1.current * M_PI * 10 / 180);
+    tmp1.vy = VIT_SMALL_AST * (-sin(tmp1.current * M_PI * 10 / 180));
+    tmp2.vx = VIT_SMALL_AST * cos(tmp2.current * M_PI * 10 / 180);
+    tmp2.vy = VIT_SMALL_AST * (-sin(tmp2.current * M_PI * 10 / 180));
+    tmp1.x += (MED_AST_SIZE - SMALL_AST_SIZE)/2;
+    tmp1.y += (MED_AST_SIZE - SMALL_AST_SIZE)/2;
+    tmp2.x += (MED_AST_SIZE - SMALL_AST_SIZE)/2;
+    tmp2.y += (MED_AST_SIZE - SMALL_AST_SIZE)/2;
+    *rest = l_ast_cons(tmp2, *rest);
+    *rest = l_ast_cons(tmp1, *rest);
+    break;
+  default:
+    break;}
+}
+
+bool proj_contact(sprite_t *project, sprite_t *ast)
 {
   SDL_Rect center_proj, center_ast;
   double rayon_proj, rayon_ast;
@@ -154,14 +220,33 @@ void proj_contact(sprite_t *project, sprite_t *ast)
   for(j = project->y ; j <= project->y + project->size ; j++){
     for(i = project->x ; i <= project->x + project->size ; i++){
       if((pow(center_proj.x - i,2) + pow(center_proj.y - j,2)) <= pow(rayon_proj,2) && (pow(center_ast.x - i,2) + pow(center_ast.y - j,2)) <= pow(rayon_ast,2)){
-	ast->x = -2;
-	ast->y = -2;
-	ast->vx = 0;
-	ast->vy = 0;
-	return;
+	return true;
       }
     }
   }
+  return false;
+}
+
+void proj_contact_list(sprite_t *project, l_ast *ast)
+{
+  sprite_t tmp_sp;
+  l_ast tmp = l_ast_copy(*ast);
+  l_ast tmp2 = l_ast_new_empty();
+  bool cont = false;
+  while(!cont && !l_ast_is_empty(tmp)){
+    tmp_sp = l_ast_pop(&tmp);
+    cont = proj_contact(project, &tmp_sp);
+    if(cont)
+      div_ast(tmp_sp, &tmp2, *project);
+    else
+      tmp2 = l_ast_cons(tmp_sp, tmp2);
+  }
+  if(cont){
+    project->x = -2;
+    project->y = -2;}
+  while(!l_ast_is_empty(tmp2))
+    tmp = l_ast_cons(l_ast_pop(&tmp2),tmp);
+  *ast = l_ast_copy(tmp);
 }
 
 bool ship_contact(sprite_t *ship, sprite_t *ast)

@@ -34,7 +34,7 @@
 #define VIT_PROJ 0.6
 #define VIT_BIG_AST 0.1
 #define VIT_MED_AST 0.2
-#define VIT_SMALL_AST 0.4
+#define VIT_SMALL_AST 0.3
 #define FROTEMENT   0.001
 
 
