@@ -11,45 +11,51 @@
    - use left/right to change the orientation of the ship
    - use up to move on the ship to the right direction
 */
-void HandleEvent(SDL_Event event,
-		 int *quit, sprite_t *ship, sprite_t *project, double *accel)
+
+
+void update_events(char *keys, int *gameover)
 {
-  switch (event.type) {
-    /* close button clicked */
-  case SDL_QUIT:
-    *quit = 1;
-    break;
-    
-    /* handle the keyboard */
-  case SDL_KEYDOWN:
-    switch (event.key.keysym.sym) {
-    case SDLK_ESCAPE:
-    case SDLK_q:
-      *quit = 1;
+  SDL_Event event;
+  while(SDL_PollEvent(&event)){
+    switch (event.type){
+    case SDL_QUIT:
+      *gameover = 1;
       break;
-    case SDLK_LEFT:
-      sprite_turn_left(ship);
+    case SDL_KEYUP:
+      keys[event.key.keysym.sym] = 0;
       break;
-    case SDLK_RIGHT:
-      sprite_turn_right(ship);
-      break;
-    case SDLK_UP:
-      *accel = CONS_ACCEL;
-      break;
-    case SDLK_DOWN:
-      *accel = - CONS_ACCEL;
-      break;
-    case SDLK_SPACE:
-      if(project->x < 0)
-	app_project(ship, project);
+    case SDL_KEYDOWN:
+      switch (event.key.keysym.sym) {
+      case SDLK_ESCAPE:
+      case SDLK_q:
+	*gameover = 1;
+	break;
+      default:
+	break;
+      }
+      keys[event.key.keysym.sym] = 1;
       break;
     default:
       break;
     }
-    break;
   }
-  //if(event.type == SDLK_SPACE && project->x!=-1){
-  //  app_project(ship, project);}
+}
+
+void alternative_HandleEvent(char *key, double *accel, sprite_t *ship, sprite_t *project)
+{
+  SDLKey tabkey[5] = {SDLK_UP,SDLK_DOWN,SDLK_LEFT,SDLK_RIGHT,SDLK_SPACE};
+  if(key[tabkey[0]])
+    *accel = CONS_ACCEL;
+  if(key[tabkey[1]])
+    *accel = - CONS_ACCEL;
+  if(key[tabkey[2]])
+    sprite_turn_left(ship);
+  if(key[tabkey[3]])
+    sprite_turn_right(ship);
+  if(key[tabkey[4]]){
+      if(project->x < 0)
+	app_project(ship, project);
+  }
 }
 
 int main(int argc, char* argv[])
@@ -150,6 +156,8 @@ int main(int argc, char* argv[])
   l_ast aster = l_ast_new_empty();
   int vies = MAX_LIFE;
   int points = 0;
+  char key[SDLK_LAST] = {0};
+  int time_k = 0;
   
   /* Define the float position of the ship */
   
@@ -190,11 +198,11 @@ int main(int argc, char* argv[])
 	
       /* look for an event; possibly update the position and the shape
        * of the sprite. */
-      if(!dest){
-	SDL_Event event;
-	if (SDL_PollEvent(&event)) {
-	  HandleEvent(event, &gameover, &space_ship, &projectile, &accel);}
+      if(!dest && time_k % 20 == 0){
+	update_events(key, &gameover);
+	alternative_HandleEvent(key, &accel, &space_ship, &projectile);
       }
+      time_k ++;
       sprite_boost(&space_ship, accel);
       sprite_move(&space_ship);
       if(!l_ast_is_empty(aster)){
