@@ -140,7 +140,7 @@ void app_ast(l_ast *aster, SDL_Surface *big, SDL_Surface *med,
   *aster = l_ast_cons(ast, *aster);
 }
 
-void div_ast(sprite_t ast, l_ast *rest, sprite_t project)
+void div_ast(sprite_t ast, l_ast *rest, sprite_t project, int *points)
 {
   sprite_t tmp1, tmp2;
   tmp1 = ast;
@@ -173,6 +173,7 @@ void div_ast(sprite_t ast, l_ast *rest, sprite_t project)
     tmp2.y += (BIG_AST_SIZE - MED_AST_SIZE)/2;
     *rest = l_ast_cons(tmp2, *rest);
     *rest = l_ast_cons(tmp1, *rest);
+    *points += BIG_AST_POINT;
     break;
   case 2:
     tmp1.type = 3;
@@ -201,8 +202,10 @@ void div_ast(sprite_t ast, l_ast *rest, sprite_t project)
     tmp2.y += (MED_AST_SIZE - SMALL_AST_SIZE)/2;
     *rest = l_ast_cons(tmp2, *rest);
     *rest = l_ast_cons(tmp1, *rest);
+    *points += MED_AST_POINT;
     break;
   default:
+    *points += SMALL_AST_POINT;
     break;}
 }
 
@@ -227,7 +230,7 @@ bool proj_contact(sprite_t *project, sprite_t *ast)
   return false;
 }
 
-void proj_contact_list(sprite_t *project, l_ast *ast)
+void proj_contact_list(sprite_t *project, l_ast *ast, int *points)
 {
   sprite_t tmp_sp;
   l_ast tmp = l_ast_copy(*ast);
@@ -237,7 +240,7 @@ void proj_contact_list(sprite_t *project, l_ast *ast)
     tmp_sp = l_ast_pop(&tmp);
     cont = proj_contact(project, &tmp_sp);
     if(cont)
-      div_ast(tmp_sp, &tmp2, *project);
+      div_ast(tmp_sp, &tmp2, *project, points);
     else
       tmp2 = l_ast_cons(tmp_sp, tmp2);
   }

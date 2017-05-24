@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 {
   srand(time(NULL));
   SDL_Surface *screen, *temp, *sprite, *background, *project, *big_ast,
-    *med_ast, *small_ast, *expl;
+    *med_ast, *small_ast, *expl, *number;
   int colorkey;
   sprite_t space_ship, projectile;  
   /* Information about the current situation of the ship: */
@@ -92,6 +92,12 @@ int main(int argc, char* argv[])
   SDL_FreeSurface(temp);
 
   SDL_SetColorKey(expl, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
+
+  temp = SDL_LoadBMP("number.bmp");
+  number = SDL_DisplayFormat(temp);
+  SDL_FreeSurface(temp);
+
+  SDL_SetColorKey(number, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
 
   temp = SDL_LoadBMP("bullet02.bmp");
   project = SDL_DisplayFormat(temp);
@@ -143,6 +149,7 @@ int main(int argc, char* argv[])
   int anim_exp;
   l_ast aster = l_ast_new_empty();
   int vies = MAX_LIFE;
+  int points = 0;
   
   /* Define the float position of the ship */
   
@@ -174,7 +181,6 @@ int main(int argc, char* argv[])
       
 
       double accel=0.0;
-      SDL_Event event;
       temps += 1;
       if(temps >= 100){
 	anim += 1;
@@ -185,6 +191,7 @@ int main(int argc, char* argv[])
       /* look for an event; possibly update the position and the shape
        * of the sprite. */
       if(!dest){
+	SDL_Event event;
 	if (SDL_PollEvent(&event)) {
 	  HandleEvent(event, &gameover, &space_ship, &projectile, &accel);}
       }
@@ -197,7 +204,7 @@ int main(int argc, char* argv[])
       spritePosition.y = space_ship.y;
       sprite_move(&projectile);
       if(projectile.x >= 0)
-	proj_contact_list(&projectile, &aster);
+	proj_contact_list(&projectile, &aster, &points);
       if(!dest && !l_ast_is_empty(aster) && !inv)
 	crash = ship_contact_list(&space_ship, &aster);
       if(crash){
@@ -292,6 +299,22 @@ int main(int argc, char* argv[])
       SDL_BlitSurface(sprite, &spriteImage, screen, &spritePosition);
     }
   }
+  int tmp1 = points;
+  int tmp2;
+  for(int i=1;i<=5;i++){
+    {
+      tmp2 = tmp1 % 10;
+      tmp1 = tmp1 / 10;
+      SDL_Rect pointImage;
+      pointImage.x = tmp2 * 16;
+      pointImage.y = 0;
+      pointImage.w = 16;
+      pointImage.h = 16;
+
+      spritePosition.x = SCREEN_WIDTH - 16 * i;
+      spritePosition.y = 0;
+      SDL_BlitSurface(number, &pointImage, screen, &spritePosition);}
+  }
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 }
   /* clean up */
@@ -303,6 +326,5 @@ int main(int argc, char* argv[])
   SDL_FreeSurface(small_ast);
   l_ast_free(&aster);
   SDL_Quit();
-  
   return 0;
 }
