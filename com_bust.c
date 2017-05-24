@@ -5,14 +5,6 @@
 #include "lis_ast.h"
 #include "physique.h"
 
-
-/* Handle events coming from the user:
-   - quit the game?
-   - use left/right to change the orientation of the ship
-   - use up to move on the ship to the right direction
-*/
-
-
 void update_events(char *keys, int *gameover)
 {
   SDL_Event event;
@@ -60,36 +52,35 @@ void alternative_HandleEvent(char *key, double *accel, sprite_t *ship, sprite_t 
 
 int main(int argc, char* argv[])
 {
+  /* to make random */
   srand(time(NULL));
+
+  /* create all surface */
   SDL_Surface *screen, *temp, *sprite, *background, *project, *big_ast,
     *med_ast, *small_ast, *expl, *number;
-  int colorkey;
-  sprite_t space_ship, projectile;  
-  /* Information about the current situation of the ship: */
   
-  /* Rectangle to store the position of the sprite in the window.
-   * Only the x and y coordinates are used. */
+  int colorkey;
+
+  /* create two sprite */
+  sprite_t space_ship, projectile;
+
+  /* to position of each sprite */
   SDL_Rect spritePosition;
   
   
-  /* initialize SDL */
   SDL_Init(SDL_INIT_VIDEO);
   
-  /* set the title bar */
   SDL_WM_SetCaption("Comet Busters", "Comet Busters");
   
-  /* create window */
   screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
   
-  /* set keyboard repeat */
   SDL_EnableKeyRepeat(10, 10);
   
-  /* load sprite */
+  /* initialisation of each img */
   temp   = SDL_LoadBMP("greenship-v1.bmp");
   sprite = SDL_DisplayFormat(temp);
   SDL_FreeSurface(temp);
   
-  /* setup sprite colorkey and turn on RLE */
   colorkey = SDL_MapRGB(screen->format, 255, 0, 255);
   SDL_SetColorKey(sprite, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
   
@@ -131,16 +122,15 @@ int main(int argc, char* argv[])
 
   SDL_SetColorKey(small_ast, SDL_SRCCOLORKEY | SDL_RLEACCEL, colorkey);
   
-  /* load background */
   temp  = SDL_LoadBMP("backgroundlvl1.bmp");
   background = SDL_DisplayFormat(temp);
   SDL_FreeSurface(temp);
   
-  /* set sprite position in the middle of the window */
   project->clip_rect.x = -1;
   project->clip_rect.y = -1;
   sprite_init(&projectile,4,project,PROJECT_SIZE,1);
   
+  /* Variable useful to the game */
   int gameover = 0;
   int anim = 0;
   int temps = 0;
@@ -159,21 +149,26 @@ int main(int argc, char* argv[])
   char key[SDLK_LAST] = {0};
   int time_k = 0;
   
-  /* Define the float position of the ship */
-  
-  /* main loop: check events and re-draw the window until the end */
   while (!gameover)
     {
       crash = false;
       actual = time(NULL);
+
+      /* the ship appeared 5 seconds after the death */
       if(dest && (difftime(actual, death) >= 3)){
 	dest = false;
 	appear = true;
 	vies -= 1;}
+
+      /* gameover if the life (vies) is 0 */
       if(vies == 0)
 	gameover = 1;
+
+      /* retire the invicibility of the ship after 3 seconds */
       if(inv && (difftime(actual, app) >= 3))
 	inv = false;
+
+      /* make he ship invincible 3 seconde after the space ship is spawned */
       if(!dest && appear){
 	spritePosition.x = (SCREEN_WIDTH - SPRITE_SIZE) / 2;
 	sprite->clip_rect.x = spritePosition.x;
@@ -183,12 +178,15 @@ int main(int argc, char* argv[])
 	appear = false;
 	inv = true;
 	app = time(NULL);}
+
+      /* spawn an asteroid all 5 seconds */
       if(difftime(actual, app_aster) >= 5){
 	app_ast(&aster, big_ast, med_ast, small_ast);
 	app_aster = time(NULL);}
       
-
       double accel=0.0;
+
+      /* animation of asteroids */
       temps += 1;
       if(temps >= 100){
 	anim += 1;
@@ -196,18 +194,18 @@ int main(int argc, char* argv[])
 	  anim = 0;}
 	temps = 0;}
 	
-      /* look for an event; possibly update the position and the shape
-       * of the sprite. */
+      /* press a key if you're not death */
       if(!dest && time_k % 20 == 0){
 	update_events(key, &gameover);
 	alternative_HandleEvent(key, &accel, &space_ship, &projectile);
       }
       time_k ++;
+
+      /* movement of each object */
       sprite_boost(&space_ship, accel);
       sprite_move(&space_ship);
       if(!l_ast_is_empty(aster)){
 	ast_move(&aster);}
-      /* collide with edges of screen */
       spritePosition.x = space_ship.x;
       spritePosition.y = space_ship.y;
       sprite_move(&projectile);
@@ -222,28 +220,25 @@ int main(int argc, char* argv[])
 	space_ship.vy = 0;
 	dest = true;}
 
-      /* draw the background */
       SDL_BlitSurface(background, NULL, screen, NULL);
-      /* Draw the selected image of the sprite at the right position */
-	/* Define the source rectangle for the BlitSurface */
       if(!dest)
       {
+	/* appear ship */
 	{SDL_Rect spriteImage;
 	spriteImage.y = 0;
 	spriteImage.w = space_ship.size;
 	spriteImage.h = space_ship.size;
-	/* choose image according to direction and animation flip: */
 	spriteImage.x = space_ship.size * space_ship.current;
 	
 	SDL_BlitSurface(sprite, &spriteImage, screen, &spritePosition);}
       }
       else{
+	/* appear ship in explosion */
 	if(anim_exp/50 < 25){
 	  {SDL_Rect spriteImage;
 	    spriteImage.y = 0;
 	    spriteImage.w = 64;
 	    spriteImage.h = 64;
-	    /* choose image according to direction and animation flip: */
 	    spriteImage.x = anim_exp/50 * 64;
 	    spritePosition.x = space_ship.x - 16;
 	    spritePosition.y = space_ship.y - 16;
@@ -253,6 +248,7 @@ int main(int argc, char* argv[])
 	}
       }
       {
+	/* appear projectile */
 	if(projectile.x>=0){
 	  spritePosition.x = projectile.x;
 	  spritePosition.y = projectile.y;
@@ -265,6 +261,7 @@ int main(int argc, char* argv[])
 	  SDL_BlitSurface(project, &projImage, screen, &spritePosition);}
       }
       {
+	/* appear each asteroid */
 	if(!l_ast_is_empty(aster)){
 	  l_ast tmp = l_ast_copy(aster);
 	  sprite_t tmp_sp;
@@ -293,7 +290,7 @@ int main(int argc, char* argv[])
 	  l_ast_free(&tmp);
 	}
       }
-      /* update the screen */
+      /* appear rest life of ship */
   for(int i=0;i<vies-1;i++){
     {
       SDL_Rect spriteImage;
@@ -301,12 +298,12 @@ int main(int argc, char* argv[])
       spriteImage.y = 0;
       spriteImage.w = space_ship.size;
       spriteImage.h = space_ship.size;
-      /* choose image according to direction and animation flip: */
       spritePosition.x = i * space_ship.size;
       spritePosition.y = 0;
       SDL_BlitSurface(sprite, &spriteImage, screen, &spritePosition);
     }
   }
+  /* appear points */
   int tmp1 = points;
   int tmp2;
   for(int i=1;i<=5;i++){
@@ -325,7 +322,6 @@ int main(int argc, char* argv[])
   }
   SDL_UpdateRect(screen, 0, 0, 0, 0);
 }
-  /* clean up */
   SDL_FreeSurface(sprite);
   SDL_FreeSurface(background);
   SDL_FreeSurface(project);

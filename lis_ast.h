@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include "struct.h"
 
-
+/* basic fonction to a list */
 l_ast l_ast_new_empty(void);
 l_ast l_ast_cons(sprite_t ast, l_ast L);
 void l_ast_reverse(l_ast *L);
