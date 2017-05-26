@@ -53,7 +53,7 @@ struct Sprite_t
   int type;
   double x;
   double y;
-  int current;
+  int direction;
   int size;
   int nb_sprite;
   double vx;

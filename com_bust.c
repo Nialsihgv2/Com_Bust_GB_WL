@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
 	spriteImage.y = 0;
 	spriteImage.w = space_ship.size;
 	spriteImage.h = space_ship.size;
-	spriteImage.x = space_ship.size * space_ship.current;
+	spriteImage.x = space_ship.size * space_ship.direction;
 	
 	SDL_BlitSurface(sprite, &spriteImage, screen, &spritePosition);}
       }
@@ -306,7 +306,7 @@ int main(int argc, char* argv[])
   /* appear points */
   int tmp1 = points;
   int tmp2;
-  for(int i=1;i<=5;i++){
+  for(int i=1;i<=6;i++){
     {
       tmp2 = tmp1 % 10;
       tmp1 = tmp1 / 10;
@@ -328,7 +328,12 @@ int main(int argc, char* argv[])
   SDL_FreeSurface(big_ast);
   SDL_FreeSurface(med_ast);
   SDL_FreeSurface(small_ast);
+  SDL_FreeSurface(number);
   l_ast_free(&aster);
   SDL_Quit();
   return 0;
 }
+
+/* Realised by :
+Firewing (Ghislain Bouriannes)
+Coolpower (Wafaa Louarrat)*/

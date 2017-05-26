@@ -10,27 +10,27 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int s
   sprite->nb_sprite = anim_sprite_num;
   sprite->vx = 0;
   sprite->vy = 0;
-  sprite->current = 0;
+  sprite->direction = 0;
   switch(type){
   case 0:
-    sprite->current = INIT_DIR;
+    sprite->direction = INIT_DIR;
     break;
   case 4:
     break;
   case 1:
-    sprite->current = rand() % 36;
-    sprite->vx = VIT_BIG_AST * cos(sprite->current * 10 * M_PI / 180);
-    sprite->vy = VIT_BIG_AST * (-sin(sprite->current * 10 * M_PI / 180));
+    sprite->direction = rand() % 36;
+    sprite->vx = VIT_BIG_AST * cos(sprite->direction * 10 * M_PI / 180);
+    sprite->vy = VIT_BIG_AST * (-sin(sprite->direction * 10 * M_PI / 180));
     break;
   case 2:
-    sprite->current = rand() % 36;
-    sprite->vx = VIT_MED_AST * cos(sprite->current * 10 * M_PI / 180);
-    sprite->vy = VIT_MED_AST * (-sin(sprite->current * 10 * M_PI / 180));
+    sprite->direction = rand() % 36;
+    sprite->vx = VIT_MED_AST * cos(sprite->direction * 10 * M_PI / 180);
+    sprite->vy = VIT_MED_AST * (-sin(sprite->direction * 10 * M_PI / 180));
     break;
   case 3:
-    sprite->current = rand() % 36;
-    sprite->vx = VIT_SMALL_AST * cos(sprite->current * 10 * M_PI / 180);
-    sprite->vy = VIT_SMALL_AST * (-sin(sprite->current * 10 * M_PI / 180));
+    sprite->direction = rand() % 36;
+    sprite->vx = VIT_SMALL_AST * cos(sprite->direction * 10 * M_PI / 180);
+    sprite->vy = VIT_SMALL_AST * (-sin(sprite->direction * 10 * M_PI / 180));
     break;
   default:
   break;}
@@ -38,16 +38,16 @@ void sprite_init(sprite_t *sprite, int type, SDL_Surface * sprite_picture, int s
 
 void sprite_turn_left(sprite_t *sprite)
 {
-  sprite->current += 1;
-  if(sprite->current >= sprite->nb_sprite)
-    sprite->current = 0;
+  sprite->direction += 1;
+  if(sprite->direction >= sprite->nb_sprite)
+    sprite->direction = 0;
 }
 
 void sprite_turn_right(sprite_t *sprite)
 {
-  sprite->current -= 1;
-  if(sprite->current < 0)
-    sprite->current = sprite->nb_sprite - 1;
+  sprite->direction -= 1;
+  if(sprite->direction < 0)
+    sprite->direction = sprite->nb_sprite - 1;
 }
 
 void sprite_move(sprite_t *sprite)
@@ -69,7 +69,7 @@ void sprite_move(sprite_t *sprite)
       sprite->y = sprite->y + SCREEN_HEIGHT - sprite->size;
     else if(sprite->y > SCREEN_HEIGHT - sprite->size)
       sprite->y =sprite->y - SCREEN_HEIGHT + sprite->size;
-    break;
+      break;
   default:
     if(sprite->x < 0)
       sprite->x = sprite->x + SCREEN_WIDTH - sprite->size;
@@ -85,21 +85,21 @@ void sprite_move(sprite_t *sprite)
 
 void sprite_boost(sprite_t *sprite, float accel)
 {
-  sprite->vx += accel * cos(sprite->current * 10 * M_PI / 180) - FROTEMENT * sprite->vx;
-  sprite->vy += accel * (-sin(sprite->current * 10 * M_PI / 180)) - FROTEMENT * sprite->vy;
-  if(abs(sprite->vx) >= abs(VIT_MAX * cos(sprite->current * 10 * M_PI / 180)) && accel > 0)
-    sprite->vx -= accel * cos(sprite->current * 10 * M_PI / 180);
-  if(abs(sprite->vy) >= abs(VIT_MAX * sin(sprite->current * 10 * M_PI / 180)))
-    sprite->vy -= accel * (-sin(sprite->current * 10 * M_PI / 180));
+  sprite->vx += accel * cos(sprite->direction * 10 * M_PI / 180) - FROTEMENT * sprite->vx;
+  sprite->vy += accel * (-sin(sprite->direction * 10 * M_PI / 180)) - FROTEMENT * sprite->vy;
+  if(abs(sprite->vx) >= abs(VIT_MAX * cos(sprite->direction * 10 * M_PI / 180)) && accel > 0)
+    sprite->vx -= accel * cos(sprite->direction * 10 * M_PI / 180);
+  if(abs(sprite->vy) >= abs(VIT_MAX * sin(sprite->direction * 10 * M_PI / 180)))
+    sprite->vy -= accel * (-sin(sprite->direction * 10 * M_PI / 180));
 }
 
 void app_project(sprite_t *space_ship, sprite_t *project)
 {
-  project->current = space_ship->current;
-  project->x = (space_ship->x + space_ship->size / 2) + (space_ship->size / 2 * cos(space_ship->current * 10 * M_PI / 180)) - project->size / 2;
-  project->y = (space_ship->y + space_ship->size / 2) + (space_ship->size / 2 * (-sin(space_ship->current * 10 * M_PI / 180))) - project->size / 2;
-  project->vx = VIT_PROJ * cos(project->current * 10 * M_PI / 180);
-  project->vy = VIT_PROJ * (-sin(project->current * 10 * M_PI / 180));
+  project->direction = space_ship->direction;
+  project->x = (space_ship->x + space_ship->size / 2) + (space_ship->size / 2 * cos(space_ship->direction * 10 * M_PI / 180)) - project->size / 2;
+  project->y = (space_ship->y + space_ship->size / 2) + (space_ship->size / 2 * (-sin(space_ship->direction * 10 * M_PI / 180))) - project->size / 2;
+  project->vx = VIT_PROJ * cos(project->direction * 10 * M_PI / 180);
+  project->vy = VIT_PROJ * (-sin(project->direction * 10 * M_PI / 180));
 }
 
 void app_ast(l_ast *aster, SDL_Surface *big, SDL_Surface *med,
@@ -151,22 +151,22 @@ void div_ast(sprite_t ast, l_ast *rest, sprite_t project, int *points)
     tmp2.type = 2;
     tmp1.size = MED_AST_SIZE;
     tmp2.size = MED_AST_SIZE;
-    tmp1.current = project.current + 9;
-    if(tmp1.current > 36)
-      tmp1.current -= 36;
+    tmp1.direction = project.direction + 9;
+    if(tmp1.direction > 36)
+      tmp1.direction -= 36;
     else
-      if(tmp1.current < 0)
-	tmp1.current += 36;
-    tmp2.current = project.current - 9;
-    if(tmp2.current > 36)
-      tmp2.current -= 36;
+      if(tmp1.direction < 0)
+	tmp1.direction += 36;
+    tmp2.direction = project.direction - 9;
+    if(tmp2.direction > 36)
+      tmp2.direction -= 36;
     else
-      if(tmp2.current < 0)
-	tmp2.current += 36;
-    tmp1.vx = VIT_MED_AST * cos(tmp1.current * M_PI * 10 / 180);
-    tmp1.vy = VIT_MED_AST * (-sin(tmp1.current * M_PI * 10 / 180));
-    tmp2.vx = VIT_MED_AST * cos(tmp2.current * M_PI * 10 / 180);
-    tmp2.vy = VIT_MED_AST * (-sin(tmp2.current * M_PI * 10 / 180));
+      if(tmp2.direction < 0)
+	tmp2.direction += 36;
+    tmp1.vx = VIT_MED_AST * cos(tmp1.direction * M_PI * 10 / 180);
+    tmp1.vy = VIT_MED_AST * (-sin(tmp1.direction * M_PI * 10 / 180));
+    tmp2.vx = VIT_MED_AST * cos(tmp2.direction * M_PI * 10 / 180);
+    tmp2.vy = VIT_MED_AST * (-sin(tmp2.direction * M_PI * 10 / 180));
     tmp1.x += (BIG_AST_SIZE - MED_AST_SIZE)/2;
     tmp1.y += (BIG_AST_SIZE - MED_AST_SIZE)/2;
     tmp2.x += (BIG_AST_SIZE - MED_AST_SIZE)/2;
@@ -180,22 +180,22 @@ void div_ast(sprite_t ast, l_ast *rest, sprite_t project, int *points)
     tmp2.type = 3;
     tmp1.size = SMALL_AST_SIZE;
     tmp2.size = SMALL_AST_SIZE;
-    tmp1.current = project.current + 9;
-    if(tmp1.current > 36)
-      tmp1.current -= 36;
+    tmp1.direction = project.direction + 9;
+    if(tmp1.direction > 36)
+      tmp1.direction -= 36;
     else
-      if(tmp1.current < 0)
-	tmp1.current += 36;
-    tmp2.current = project.current - 9;
-    if(tmp2.current > 36)
-      tmp2.current -= 36;
+      if(tmp1.direction < 0)
+	tmp1.direction += 36;
+    tmp2.direction = project.direction - 9;
+    if(tmp2.direction > 36)
+      tmp2.direction -= 36;
     else
-      if(tmp2.current < 0)
-	tmp2.current += 36;
-    tmp1.vx = VIT_SMALL_AST * cos(tmp1.current * M_PI * 10 / 180);
-    tmp1.vy = VIT_SMALL_AST * (-sin(tmp1.current * M_PI * 10 / 180));
-    tmp2.vx = VIT_SMALL_AST * cos(tmp2.current * M_PI * 10 / 180);
-    tmp2.vy = VIT_SMALL_AST * (-sin(tmp2.current * M_PI * 10 / 180));
+      if(tmp2.direction < 0)
+	tmp2.direction += 36;
+    tmp1.vx = VIT_SMALL_AST * cos(tmp1.direction * M_PI * 10 / 180);
+    tmp1.vy = VIT_SMALL_AST * (-sin(tmp1.direction * M_PI * 10 / 180));
+    tmp2.vx = VIT_SMALL_AST * cos(tmp2.direction * M_PI * 10 / 180);
+    tmp2.vy = VIT_SMALL_AST * (-sin(tmp2.direction * M_PI * 10 / 180));
     tmp1.x += (MED_AST_SIZE - SMALL_AST_SIZE)/2;
     tmp1.y += (MED_AST_SIZE - SMALL_AST_SIZE)/2;
     tmp2.x += (MED_AST_SIZE - SMALL_AST_SIZE)/2;
@@ -250,6 +250,8 @@ void proj_contact_list(sprite_t *project, l_ast *ast, int *points)
   while(!l_ast_is_empty(tmp2))
     tmp = l_ast_cons(l_ast_pop(&tmp2),tmp);
   *ast = l_ast_copy(tmp);
+  l_ast_free(&tmp);
+  l_ast_free(&tmp2);
 }
 
 bool ship_contact(sprite_t *ship, sprite_t *ast)
